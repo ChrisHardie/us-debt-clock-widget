@@ -1,6 +1,9 @@
 
 .us_debtclock_widget_amount {
     font-size: large;
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .us_debtclock_widget_credit {

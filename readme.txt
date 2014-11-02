@@ -1,6 +1,6 @@
 === U.S. Debt Clock Widget ===
 Contributors: chrishardie
-Tags: economy,finance,widgets,money
+Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
 Tested up to: 4.0
 License: GPL2
@@ -12,7 +12,7 @@ This plugin creates a widget displaying the most recently available amount of th
 This plugin creates a widget displaying the most recently available amount of the U.S. National Debt. Data is retrieved from treasury.io and a source link to the original report from the U.S. Treasury can optionally be displayed.
 
 == Installation ==
-1. Upload the `us-debtclock-widget` folder to the `/wp-content/plugins\` directory
+1. Upload the `us-debt-clock-widget` folder to the `/wp-content/plugins\` directory
 2. Activate the U.S. Debt Clock Widget plugin through the `Plugins` menu in the WordPress dashboard
 3. Add the widget to an available widget area and configure the display options
 

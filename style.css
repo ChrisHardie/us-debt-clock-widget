@@ -6,6 +6,9 @@
     margin-top: 5px;
 }
 
+.us_debtclock_widget_error {
+    font-size: small;
+}
 .us_debtclock_widget_credit {
     font-size: x-small;
 }

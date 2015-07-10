@@ -128,6 +128,11 @@ class Debtclock_Widget extends WP_Widget {
 			echo "</script>";
 		}
 
+		if ( ! is_numeric( $debt_amount ) ) {
+			echo '<div id="debtclock_error" class="us_debtclock_widget_error">There was a
+				problem fetching the data, please try again later.</div>';
+		}
+
 		// Give credit where it's due?
 		if ( $instance['show_credit_p'] ) {
 			echo '<p class="us_debtclock_widget_credit">
@@ -278,6 +283,9 @@ class JCH_Debtclock {
 
 		// If it was empty, something went wrong
 		if( empty($data) ) return false;
+
+		// If it doesn't have the field data requested, something went wrong
+		if ( ! $us_debtclock_widget_info['close_today'] ) return false;
 
 		$us_debtclock_widget_info = reset( json_decode($data, true) ); // Load data into runtime cache
 

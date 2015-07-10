@@ -3,6 +3,8 @@ Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
 Tested up to: 4.2
+Version: 1.1
+Stable tag: trunk
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -23,6 +25,10 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 2. The widget options configuration display
 
 == Changelog ==
+
+= 1.1 =
+
+* Improvement: Handle invalid data from treasury.io more gracefully
 
 = 1.0 =
 

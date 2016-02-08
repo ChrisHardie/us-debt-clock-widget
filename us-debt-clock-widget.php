@@ -229,9 +229,6 @@ class JCH_Debtclock {
 
 	public function init() {
 
-		$class = __CLASS__;
-		new $class;
-
 		// If the widget is active, enqueue needed CSS
 		if ( is_active_widget( false, false, 'us_debtclock_widget' ) ) {
 			add_action( 'wp_head', array( &$this, 'add_styles_and_scripts' ) );

@@ -16,7 +16,7 @@ This plugin creates a widget displaying the most recently available amount of th
 Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us-debt-clock-widget">Pull requests are welcome</a>.
 
 == Installation ==
-1. Upload the `us-debt-clock-widget` folder to the `/wp-content/plugins\` directory
+1. Upload the `us-debt-clock-widget` folder to the `/wp-content/plugins/` directory
 2. Activate the U.S. Debt Clock Widget plugin through the `Plugins` menu in the WordPress dashboard
 3. Add the widget to an available widget area and configure the display options
 

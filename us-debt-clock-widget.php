@@ -228,7 +228,9 @@ class JCH_Debtclock {
 	}
 
 	public function init() {
-		register_widget( 'Debtclock_Widget' );
+
+		$class = __CLASS__;
+		new $class;
 
 		// If the widget is active, enqueue needed CSS
 		if ( is_active_widget( false, false, 'us_debtclock_widget' ) ) {
@@ -238,7 +240,7 @@ class JCH_Debtclock {
 	}
 
 	/**
-	 * On activation, schedule an hourly update of the debt data from the source.
+	 * On plugin activation, schedule an hourly update of the debt data from the source.
 	 */
 	public function us_debtclock_widget_activation() {
 		if ( ! wp_next_scheduled( 'us_debtclock_widget_event_hook' ) ) {
@@ -249,10 +251,11 @@ class JCH_Debtclock {
 	}
 
 	/**
-	 * On deactivation, remove all functions from the scheduled action hook.
+	 * On plugin deactivation, remove all functions from the scheduled action hook.
 	 */
 	public function us_debtclock_widget_deactivation() {
 		wp_clear_scheduled_hook( 'us_debtclock_widget_event_hook' );
+		delete_transient( 'us_debtclock_widget_info' );
 	}
 
 	function add_styles_and_scripts() {
@@ -280,6 +283,10 @@ class JCH_Debtclock {
 		$debt_sql = 'SELECT "close_today", "open_today", "url" FROM t3c WHERE "item_raw" = \'Total Public Debt Outstanding\' ORDER BY date DESC LIMIT 1';
 		$encoded_debt_sql = urlencode( $debt_sql );
 
+		/**
+		 * Example request URL:
+		 * http://api.treasury.io/cc7znvq/47d80ae900e04f2/sql/?q=SELECT+%22close_today%22%2C+%22open_today%22%2C+%22url%22+FROM+t3c+WHERE+%22item_raw%22+%3D+%27Total+Public+Debt+Outstanding%27+ORDER+BY+date+DESC+LIMIT+1
+		 */
 		$response = wp_remote_get( $treasury_api_url . $encoded_debt_sql );
 		$data = wp_remote_retrieve_body( $response );
 
@@ -293,12 +300,12 @@ class JCH_Debtclock {
 			return false;
 		}
 
+		$us_debtclock_widget_info = reset( json_decode( $data, true ) ); // Load data into runtime cache
+
 		// If it doesn't have the field data requested, something went wrong
 		if ( ! $us_debtclock_widget_info['close_today'] ) {
 			return false;
 		}
-
-		$us_debtclock_widget_info = reset( json_decode( $data, true ) ); // Load data into runtime cache
 
 		// If it's a real number, put it in a transient for later use
 		if ( is_numeric( $us_debtclock_widget_info['close_today'] ) ) {
@@ -313,5 +320,11 @@ class JCH_Debtclock {
 }
 
 $jch_debtclock_widget = new JCH_Debtclock();
+
+add_action( 'widgets_init', function() {
+	register_widget( 'Debtclock_Widget' );
+} );
+
+
 
 ?>

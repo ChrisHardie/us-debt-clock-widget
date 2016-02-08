@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: U.S. Debt Clock Widget
-Plugin URI:
+Plugin URI: https://github.com/ChrisHardie/us-debt-clock-widget
 Description: Display the U.S. national debt in a widget
 Author: Chris Hardie
-Version: 1.1
-Author URI: http://www.chrishardie.com/
+Version: 1.2
+Author URI: https://chrishardie.com/
 License: GPL2
 */
 

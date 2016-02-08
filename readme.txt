@@ -2,8 +2,8 @@
 Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
-Tested up to: 4.2
-Version: 1.1
+Tested up to: 4.4
+Version: 1.2
 Stable tag: trunk
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -25,6 +25,13 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 2. The widget options configuration display
 
 == Changelog ==
+
+= 1.2 =
+
+* Fix: error in get_debt logic that was preventing successful data from being returned
+* Fix: update widget registration to work with recent versions of WordPress
+* Improvement: Update code formatting and escaping to better adhere to WordPress coding standards
+* Improvement: Delete transient when plugin is deactivated
 
 = 1.1 =
 

@@ -58,7 +58,7 @@ class Debtclock_Widget extends WP_Widget {
 		} elseif ( is_numeric( $debt_info['close_today'] ) ) {
 
 			// The value from treasury.io is in millions, e.g. 1000 equals $1 billion.
-			$debt_amount = $debt_info['close_today'] * 1000;
+			$debt_amount = $debt_info['close_today'] * 1000000;
 
 			// For maximum effect let's display the big number, with commas, no cents.
 			$debt_amount_formatted = number_format( $debt_amount, 0, '.', ',' );
@@ -66,7 +66,7 @@ class Debtclock_Widget extends WP_Widget {
 			if ( $instance['animate_p'] ) {
 
 				// Calculate how much the debt increased per second on average
-				$debt_delta = ( ( ( $debt_info['close_today'] - $debt_info['open_today'] ) * 1000 ) / 86400 );
+				$debt_delta = ( ( ( $debt_info['close_today'] - $debt_info['open_today'] ) * 1000000 ) / 86400 );
 
 				wp_enqueue_script( 'jquery' );
 

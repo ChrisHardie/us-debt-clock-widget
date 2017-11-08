@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 This plugin creates a widget displaying the most recently available amount of the U.S. National Debt.
 
 == Description ==
-This plugin creates a widget displaying the most recently available amount of the U.S. National Debt. Data is retrieved from treasury.io and a source link to the original report from the U.S. Treasury can optionally be displayed.
+This plugin creates a widget displaying the most recently available amount of the U.S. National Debt. Data is retrieved from treasurydirect.gov and a source link can optionally be displayed.
 
 Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us-debt-clock-widget">Pull requests are welcome</a>.
 

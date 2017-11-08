@@ -4,7 +4,7 @@ Plugin Name: U.S. Debt Clock Widget
 Plugin URI: https://github.com/ChrisHardie/us-debt-clock-widget
 Description: Display the U.S. national debt in a widget
 Author: Chris Hardie
-Version: 1.3
+Version: 1.4
 Author URI: https://chrishardie.com/
 License: GPL2
 */

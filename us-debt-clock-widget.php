@@ -55,18 +55,18 @@ class Debtclock_Widget extends WP_Widget {
 		if ( false === ( $debt_info = JCH_Debtclock::get_debt() ) ) {
 			$debt_amount = 'UNAVAILABLE';
 			$debt_amount_formatted = 'UNAVAILABLE';
-		} elseif ( is_numeric( $debt_info['close_today'] ) ) {
+		} elseif ( is_numeric( $debt_info['current_debt'] ) ) {
 
-			// The value from treasury.io is in millions, e.g. 1000 equals $1 billion.
-			$debt_amount = $debt_info['close_today'] * 1000000;
+			$debt_amount = $debt_info['current_debt'];
 
 			// For maximum effect let's display the big number, with commas, no cents.
 			$debt_amount_formatted = number_format( $debt_amount, 0, '.', ',' );
 
 			if ( $instance['animate_p'] ) {
 
-				// Calculate how much the debt increased per second on average
-				$debt_delta = ( ( ( $debt_info['close_today'] - $debt_info['open_today'] ) * 1000000 ) / 86400 );
+				// Calculate how much the debt increased per second on average between the two timestamps
+				$time_delta = (int) ( $debt_info['current_date'] - $debt_info['previous_date'] );
+				$debt_delta = ( ( ( $debt_info['current_debt'] - $debt_info['previous_debt'] ) ) / $time_delta );
 
 				wp_enqueue_script( 'jquery' );
 
@@ -96,7 +96,7 @@ class Debtclock_Widget extends WP_Widget {
 		     . esc_html( $debt_amount_formatted ) . '</div>';
 
 		// If they want moving numbers and we're starting with a real number...
-		if ( $instance['animate_p'] && is_numeric( $debt_amount ) ) {
+		if ( $instance['animate_p'] && is_numeric( $debt_amount ) && is_numeric( $debt_delta ) ) {
 
 			// Increment the amount by the per-second delta we calculated earlier
 			echo "<script type='text/javascript'>";
@@ -133,8 +133,7 @@ class Debtclock_Widget extends WP_Widget {
 		// Give credit where it's due?
 		if ( $instance['show_credit_p'] ) {
 			echo '<p class="us_debtclock_widget_credit">
-				<a class="us_debtclock_widget_credit_link" target="_blank" href=" ' . esc_html( $debt_info['url'] ) . '">Source</a>,
-				via <a class="us_debtclock_widget_credit_link" target="_blank" href="http://treasury.io/">treasury.io</a>
+				<a class="us_debtclock_widget_credit_link" target="_blank" href=" ' . esc_html( $debt_info['url'] ) . '">Source</a>
 			</p>';
 		}
 
@@ -237,11 +236,11 @@ class JCH_Debtclock {
 	}
 
 	/**
-	 * On plugin activation, schedule an hourly update of the debt data from the source.
+	 * On plugin activation, schedule a twice-daily update of the debt data from the source.
 	 */
 	public function us_debtclock_widget_activation() {
 		if ( ! wp_next_scheduled( 'us_debtclock_widget_event_hook' ) ) {
-			wp_schedule_event( time(), 'hourly', 'us_debtclock_widget_event_hook' );
+			wp_schedule_event( time(), 'twicedaily', 'us_debtclock_widget_event_hook' );
 		}
 
 		add_action( 'us_debtclock_widget_event_hook', 'get_debt' );
@@ -265,48 +264,50 @@ class JCH_Debtclock {
 	public static function get_debt( ) {
 
 		global $us_debtclock_widget_info; // Check if it's in the runtime cache
+
 		if ( empty( $us_debtclock_widget_info ) ) {
 			$us_debtclock_widget_info = get_transient( 'us_debtclock_widget_info' ); // Check database
 		}
 
-		if ( ! empty( $us_debtclock_widget_info ) ) {
+		if ( ! empty( $us_debtclock_widget_info['current_debt'] ) ) {
 			return $us_debtclock_widget_info;
+		} else {
+			delete_transient( 'us_debtclock_widget_info' );
 		}
 
-		// Query treasury.io - see http://treasury.io/
-		$treasury_api_url = 'http://api.treasury.io/cc7znvq/47d80ae900e04f2/sql/?q=';
+		$debt_feed_url = 'https://treasurydirect.gov/NP/debt/rss';
+		$us_debtclock_widget_info['url'] = 'https://treasurydirect.gov/NP/debt/current';
 
-		// Get the open and close date along with source URL for the total outstanding date, most recent, only one record
-		$debt_sql = 'SELECT "close_today", "open_today", "url" FROM t3c WHERE "item_raw" = \'Total Public Debt Outstanding\' ORDER BY date DESC LIMIT 1';
-		$encoded_debt_sql = urlencode( $debt_sql );
+		$debt_feed_contents = fetch_feed( $debt_feed_url );
 
-		/**
-		 * Example request URL:
-		 * http://api.treasury.io/cc7znvq/47d80ae900e04f2/sql/?q=SELECT+%22close_today%22%2C+%22open_today%22%2C+%22url%22+FROM+t3c+WHERE+%22item_raw%22+%3D+%27Total+Public+Debt+Outstanding%27+ORDER+BY+date+DESC+LIMIT+1
-		 */
-		$response = wp_remote_get( $treasury_api_url . $encoded_debt_sql );
-		$data = wp_remote_retrieve_body( $response );
-
-		/**
-		 * Example return data:
-		 * [{"close_today": 17899001.0, "open_today": 17898403.0, "url": "https://www.fms.treas.gov/fmsweb/viewDTSFiles?fname=14102300.txt&dir=w"}]
-		 */
-
-		// If it was empty, something went wrong
-		if ( empty( $data ) ) {
+		if ( is_wp_error( $debt_feed_contents ) ) {
 			return false;
 		}
 
-		$us_debtclock_widget_info = reset( json_decode( $data, true ) ); // Load data into runtime cache
+		// Get the most recent number and the one right before, for possible animation
+		$max_items = $debt_feed_contents->get_item_quantity( 2 );
+		list( $recent_debt, $previous_debt ) = $debt_feed_contents->get_items( 0, $max_items );
+
+		if ( ! ( is_object( $recent_debt ) && is_object( $previous_debt ) ) ) {
+			return false;
+		}
+
+		// Format timestamps as seconds since epoch for easier delta calculation in animation
+		$us_debtclock_widget_info['current_date'] = $recent_debt->get_date( 'U' );
+		$us_debtclock_widget_info['previous_date'] = $previous_debt->get_date( 'U' );
+
+		// <em>Debt Held by the Public:</em> 14,822,172,493,990.24<br /><em>Intragovernmental Holdings:</em> 5,652,677,544,564.30<br /><em>Total Public Debt Outstanding:</em> 20,474,850,038,554.541
+		$us_debtclock_widget_info['current_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $recent_debt->get_content() ) );
+		$us_debtclock_widget_info['previous_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $previous_debt->get_content() ) );
 
 		// If it doesn't have the field data requested, something went wrong
-		if ( ! $us_debtclock_widget_info['close_today'] ) {
+		if ( ! $us_debtclock_widget_info['current_debt'] ) {
 			return false;
 		}
 
 		// If it's a real number, put it in a transient for later use
-		if ( is_numeric( $us_debtclock_widget_info['close_today'] ) ) {
-			set_transient( 'us_debtclock_widget_info', $us_debtclock_widget_info, 1 * 60 * 60 ); // Store in database for up to 1 hour
+		if ( is_numeric( $us_debtclock_widget_info['current_debt'] ) ) {
+			set_transient( 'us_debtclock_widget_info', $us_debtclock_widget_info, 12 * HOUR_IN_SECONDS ); // Store in database for up to 12 hours
 		} else {
 			return false;
 		}

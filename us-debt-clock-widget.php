@@ -4,39 +4,41 @@ Plugin Name: U.S. Debt Clock Widget
 Plugin URI: https://github.com/ChrisHardie/us-debt-clock-widget
 Description: Display the U.S. national debt in a widget
 Author: Chris Hardie
-Version: 1.3
+Version: 1.4
 Author URI: https://chrishardie.com/
 License: GPL2
 */
 
 /*
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-defined( 'ABSPATH' ) or die( "Please don't try to run this file directly." );
+defined( 'ABSPATH' ) || die( "Please don't try to run this file directly." );
 
 class Debtclock_Widget extends WP_Widget {
 	/**
 	 * Register the widget with WordPress
 	 */
-	function __construct() {
+	public function __construct() {
 		parent::__construct(
 			'us_debtclock_widget', // base id
 			esc_html__( 'U.S. Debt Clock Widget', 'us_debtclock_widget_domain' ), // name
-			array( 'description' => __( 'A widget to display the U.S. national debt.', 'us_debtclock_widget_domain' ) )
+			array(
+				'description' => __( 'A widget to display the U.S. national debt.', 'us_debtclock_widget_domain' ),
+			)
 		);
 	}
 
@@ -49,24 +51,26 @@ class Debtclock_Widget extends WP_Widget {
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
+
+		$debt_info = JCH_Debtclock::get_debt();
 
 		// If we can't get a value for the current debt info, at least display something.
-		if ( false === ( $debt_info = JCH_Debtclock::get_debt() ) ) {
+		if ( ! $debt_info ) {
 			$debt_amount = 'UNAVAILABLE';
 			$debt_amount_formatted = 'UNAVAILABLE';
-		} elseif ( is_numeric( $debt_info['close_today'] ) ) {
+		} elseif ( is_numeric( $debt_info['current_debt'] ) ) {
 
-			// The value from treasury.io is in millions, e.g. 1000 equals $1 billion.
-			$debt_amount = $debt_info['close_today'] * 1000000;
+			$debt_amount = $debt_info['current_debt'];
 
 			// For maximum effect let's display the big number, with commas, no cents.
-			$debt_amount_formatted = number_format( $debt_amount, 0, '.', ',' );
+			$debt_amount_formatted = number_format( $debt_amount );
 
 			if ( $instance['animate_p'] ) {
 
-				// Calculate how much the debt increased per second on average
-				$debt_delta = ( ( ( $debt_info['close_today'] - $debt_info['open_today'] ) * 1000000 ) / 86400 );
+				// Calculate how much the debt increased per second on average between the two timestamps
+				$time_delta = (int) ( $debt_info['current_date'] - $debt_info['previous_date'] );
+				$debt_delta = ( ( $debt_info['current_debt'] - $debt_info['previous_debt'] ) / $time_delta );
 
 				wp_enqueue_script( 'jquery' );
 
@@ -77,26 +81,26 @@ class Debtclock_Widget extends WP_Widget {
 		}
 
 		// Output the widget content
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 
 		// Title
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
 		}
 
 		// User-defined introduction
 		if ( ! empty( $instance['introduction'] ) ) {
 			echo '<div class="us_debtclock_widget_introduction">';
-			echo esc_html_e( $instance['introduction'] );
+			echo esc_html( $instance['introduction'] );
 			echo '</div>';
 		}
 
 		// Actual debt amount, formatted (maybe replaced by JS actions below)
 		echo '<div id="debtclock_amount" class="us_debtclock_widget_amount">$'
-		     . esc_html( $debt_amount_formatted ) . '</div>';
+			. esc_html( $debt_amount_formatted ) . '</div>';
 
 		// If they want moving numbers and we're starting with a real number...
-		if ( $instance['animate_p'] && is_numeric( $debt_amount ) ) {
+		if ( is_numeric( $debt_amount ) && is_numeric( $debt_delta ) && $instance['animate_p'] ) {
 
 			// Increment the amount by the per-second delta we calculated earlier
 			echo "<script type='text/javascript'>";
@@ -133,12 +137,11 @@ class Debtclock_Widget extends WP_Widget {
 		// Give credit where it's due?
 		if ( $instance['show_credit_p'] ) {
 			echo '<p class="us_debtclock_widget_credit">
-				<a class="us_debtclock_widget_credit_link" target="_blank" href=" ' . esc_html( $debt_info['url'] ) . '">Source</a>,
-				via <a class="us_debtclock_widget_credit_link" target="_blank" href="http://treasury.io/">treasury.io</a>
+				<a class="us_debtclock_widget_credit_link" target="_blank" href=" ' . esc_html( $debt_info['url'] ) . '">Source</a>
 			</p>';
 		}
 
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 
@@ -168,19 +171,19 @@ class Debtclock_Widget extends WP_Widget {
 	 * @see WP_Widget::form()
 	 *
 	 * @param array $instance Previously saved values from database.
+	 * @return string
 	 */
 	public function form( $instance ) {
 
 		if ( isset( $instance['title'] ) ) {
 			$title = $instance['title'];
-		}
-		else {
+		} else {
 			$title = esc_html__( 'U.S. National Debt', 'us_debtclock_widget_domain' );
 		}
+
 		if ( isset( $instance['introduction'] ) ) {
 			$introduction = $instance['introduction'];
-		}
-		else {
+		} else {
 			$introduction = esc_html__( 'The current U.S. national debt:', 'us_debtclock_widget_domain' );
 		}
 
@@ -194,32 +197,34 @@ class Debtclock_Widget extends WP_Widget {
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_attr_e( 'Title:' ); ?></label>
 			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
-			       name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>"
-			       type="text" value="<?php echo esc_html( esc_attr( $title ) ); ?>">
+				name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>"
+				type="text" value="<?php echo esc_html( esc_attr( $title ) ); ?>">
 		</p>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'introduction' ) ); ?>"><?php esc_html_e( 'Introduction Text:' ); ?></label>
 			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'introduction' ) ); ?>"
-			       name="<?php echo esc_attr( $this->get_field_name( 'introduction' ) ); ?>"
-			       type="text" value="<?php echo esc_attr( $introduction ); ?>">
+				name="<?php echo esc_attr( $this->get_field_name( 'introduction' ) ); ?>"
+				type="text" value="<?php echo esc_attr( $introduction ); ?>">
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked( $animate_p ); ?> id="<?php echo esc_attr( $this->get_field_id( 'animate_p' ) ); ?>"
-			       name="<?php echo esc_attr( $this->get_field_name( 'animate_p' ) ); ?>" />
+				name="<?php echo esc_attr( $this->get_field_name( 'animate_p' ) ); ?>" />
 			<label for="<?php echo esc_attr( $this->get_field_id( 'animate_p' ) ); ?>"><?php esc_html_e( 'Animate dollar amount with estimated change over time?' ); ?></label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked( $show_credit_p ); ?> id="<?php echo esc_attr( $this->get_field_id( 'show_credit_p' ) ); ?>"
-			       name="<?php echo esc_attr( $this->get_field_name( 'show_credit_p' ) ); ?>" />
+				name="<?php echo esc_attr( $this->get_field_name( 'show_credit_p' ) ); ?>" />
 			<label for="<?php echo esc_attr( $this->get_field_id( 'show_credit_p' ) ); ?>"><?php esc_html_e( 'Include credit link to data source?' ); ?></label>
 		</p>
 
 	<?php
+
+		return true;
 	}
 }
 
 class JCH_Debtclock {
-	function __construct() {
+	public function __construct() {
 		add_action( 'init', array( $this, 'init' ), 1 );
 
 		register_activation_hook( __FILE__, array( $this, 'us_debtclock_widget_activation' ) );
@@ -237,11 +242,11 @@ class JCH_Debtclock {
 	}
 
 	/**
-	 * On plugin activation, schedule an hourly update of the debt data from the source.
+	 * On plugin activation, schedule a twice-daily update of the debt data from the source.
 	 */
 	public function us_debtclock_widget_activation() {
 		if ( ! wp_next_scheduled( 'us_debtclock_widget_event_hook' ) ) {
-			wp_schedule_event( time(), 'hourly', 'us_debtclock_widget_event_hook' );
+			wp_schedule_event( time(), 'twicedaily', 'us_debtclock_widget_event_hook' );
 		}
 
 		add_action( 'us_debtclock_widget_event_hook', 'get_debt' );
@@ -255,58 +260,59 @@ class JCH_Debtclock {
 		delete_transient( 'us_debtclock_widget_info' );
 	}
 
-	function add_styles_and_scripts() {
+	public function add_styles_and_scripts() {
 		wp_enqueue_style( 'debtclock_widget_style', plugins_url( 'style.css', __FILE__ ) );
 	}
 
 	/**
 	 * Actually fetch the debt info from the remote source
 	 */
-	public static function get_debt( ) {
+	public static function get_debt() {
 
 		global $us_debtclock_widget_info; // Check if it's in the runtime cache
+
 		if ( empty( $us_debtclock_widget_info ) ) {
 			$us_debtclock_widget_info = get_transient( 'us_debtclock_widget_info' ); // Check database
 		}
 
-		if ( ! empty( $us_debtclock_widget_info ) ) {
+		if ( ! empty( $us_debtclock_widget_info['current_debt'] ) ) {
 			return $us_debtclock_widget_info;
 		}
+		delete_transient( 'us_debtclock_widget_info' );
 
-		// Query treasury.io - see http://treasury.io/
-		$treasury_api_url = 'http://api.treasury.io/cc7znvq/47d80ae900e04f2/sql/?q=';
+		$debt_feed_url = 'https://treasurydirect.gov/NP/debt/rss';
+		$us_debtclock_widget_info['url'] = 'https://treasurydirect.gov/NP/debt/current';
 
-		// Get the open and close date along with source URL for the total outstanding date, most recent, only one record
-		$debt_sql = 'SELECT "close_today", "open_today", "url" FROM t3c WHERE "item_raw" = \'Total Public Debt Outstanding\' ORDER BY date DESC LIMIT 1';
-		$encoded_debt_sql = urlencode( $debt_sql );
+		$debt_feed_contents = fetch_feed( $debt_feed_url );
 
-		/**
-		 * Example request URL:
-		 * http://api.treasury.io/cc7znvq/47d80ae900e04f2/sql/?q=SELECT+%22close_today%22%2C+%22open_today%22%2C+%22url%22+FROM+t3c+WHERE+%22item_raw%22+%3D+%27Total+Public+Debt+Outstanding%27+ORDER+BY+date+DESC+LIMIT+1
-		 */
-		$response = wp_remote_get( $treasury_api_url . $encoded_debt_sql );
-		$data = wp_remote_retrieve_body( $response );
-
-		/**
-		 * Example return data:
-		 * [{"close_today": 17899001.0, "open_today": 17898403.0, "url": "https://www.fms.treas.gov/fmsweb/viewDTSFiles?fname=14102300.txt&dir=w"}]
-		 */
-
-		// If it was empty, something went wrong
-		if ( empty( $data ) ) {
+		if ( is_wp_error( $debt_feed_contents ) ) {
 			return false;
 		}
 
-		$us_debtclock_widget_info = reset( json_decode( $data, true ) ); // Load data into runtime cache
+		// Get the most recent number and the one right before, for possible animation
+		$max_items = $debt_feed_contents->get_item_quantity( 2 );
+		list( $recent_debt, $previous_debt ) = $debt_feed_contents->get_items( 0, $max_items );
+
+		if ( ! ( is_object( $recent_debt ) && is_object( $previous_debt ) ) ) {
+			return false;
+		}
+
+		// Format timestamps as seconds since epoch for easier delta calculation in animation
+		$us_debtclock_widget_info['current_date'] = $recent_debt->get_date( 'U' );
+		$us_debtclock_widget_info['previous_date'] = $previous_debt->get_date( 'U' );
+
+		// <em>Debt Held by the Public:</em> 14,822,172,493,990.24<br /><em>Intragovernmental Holdings:</em> 5,652,677,544,564.30<br /><em>Total Public Debt Outstanding:</em> 20,474,850,038,554.541
+		$us_debtclock_widget_info['current_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $recent_debt->get_content() ) );
+		$us_debtclock_widget_info['previous_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $previous_debt->get_content() ) );
 
 		// If it doesn't have the field data requested, something went wrong
-		if ( ! $us_debtclock_widget_info['close_today'] ) {
+		if ( ! $us_debtclock_widget_info['current_debt'] ) {
 			return false;
 		}
 
 		// If it's a real number, put it in a transient for later use
-		if ( is_numeric( $us_debtclock_widget_info['close_today'] ) ) {
-			set_transient( 'us_debtclock_widget_info', $us_debtclock_widget_info, 1 * 60 * 60 ); // Store in database for up to 1 hour
+		if ( is_numeric( $us_debtclock_widget_info['current_debt'] ) ) {
+			set_transient( 'us_debtclock_widget_info', $us_debtclock_widget_info, 12 * HOUR_IN_SECONDS ); // Store in database for up to 12 hours
 		} else {
 			return false;
 		}

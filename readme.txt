@@ -2,8 +2,8 @@
 Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
-Tested up to: 4.7
-Version: 1.3
+Tested up to: 4.9
+Version: 1.4
 Stable tag: trunk
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -25,6 +25,11 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 2. The widget options configuration display
 
 == Changelog ==
+
+= 1.4 =
+
+* Fix: change data source from treasury.io to treasurydirect.gov
+* Improvement: code style and formatting
 
 = 1.3 =
 

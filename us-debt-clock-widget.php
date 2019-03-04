@@ -4,7 +4,7 @@ Plugin Name: U.S. Debt Clock Widget
 Plugin URI: https://github.com/ChrisHardie/us-debt-clock-widget
 Description: Display the U.S. national debt in a widget
 Author: Chris Hardie
-Version: 1.4
+Version: 1.5
 Author URI: https://chrishardie.com/
 License: GPL2
 */
@@ -53,7 +53,8 @@ class Debtclock_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 
-		$debt_info = JCH_Debtclock::get_debt();
+		$debt_info  = JCH_Debtclock::get_debt();
+		$debt_delta = '';
 
 		// If we can't get a value for the current debt info, at least display something.
 		if ( ! $debt_info ) {
@@ -100,7 +101,11 @@ class Debtclock_Widget extends WP_Widget {
 			. esc_html( $debt_amount_formatted ) . '</div>';
 
 		// If they want moving numbers and we're starting with a real number...
-		if ( is_numeric( $debt_amount ) && is_numeric( $debt_delta ) && $instance['animate_p'] ) {
+		if ( ! empty( $debt_amount )
+			&& ! empty( $debt_delta )
+			&& is_numeric( $debt_amount )
+			&& is_numeric( $debt_delta )
+			&& $instance['animate_p'] ) {
 
 			// Increment the amount by the per-second delta we calculated earlier
 			echo "<script type='text/javascript'>";

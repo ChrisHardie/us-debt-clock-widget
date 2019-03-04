@@ -26,6 +26,11 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 
 == Changelog ==
 
+= 1.5 =
+
+* Fix: catch unassigned variable scenario
+* Improvement: further code standards updates
+
 = 1.4 =
 
 * Fix: change data source from treasury.io to treasurydirect.gov

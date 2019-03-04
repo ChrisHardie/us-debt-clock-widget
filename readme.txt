@@ -2,8 +2,8 @@
 Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
-Tested up to: 5.0
-Version: 1.4
+Tested up to: 5.1
+Version: 1.5
 Stable tag: trunk
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl.html

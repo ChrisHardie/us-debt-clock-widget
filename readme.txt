@@ -28,8 +28,8 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 
 = 1.5 =
 
-* Fix: catch unassigned variable scenario
-* Improvement: further code standards updates
+* Fix: catch undefined variable scenario
+* Improvement: additional code standards and formatting updates
 
 = 1.4 =
 

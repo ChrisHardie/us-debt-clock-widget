@@ -2,8 +2,8 @@
 Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
-Tested up to: 5.0
-Version: 1.4
+Tested up to: 5.1
+Version: 1.5
 Stable tag: trunk
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -25,6 +25,11 @@ Want to help make this plugin better? <a href="https://github.com/ChrisHardie/us
 2. The widget options configuration display
 
 == Changelog ==
+
+= 1.5 =
+
+* Fix: catch undefined variable scenario
+* Improvement: additional code standards and formatting updates
 
 = 1.4 =
 

@@ -58,7 +58,7 @@ class Debtclock_Widget extends WP_Widget {
 
 		// If we can't get a value for the current debt info, at least display something.
 		if ( ! $debt_info ) {
-			$debt_amount = 'UNAVAILABLE';
+			$debt_amount           = 'UNAVAILABLE';
 			$debt_amount_formatted = 'UNAVAILABLE';
 		} elseif ( is_numeric( $debt_info['current_debt'] ) ) {
 
@@ -70,14 +70,14 @@ class Debtclock_Widget extends WP_Widget {
 			if ( $instance['animate_p'] ) {
 
 				// Calculate how much the debt increased per second on average between the two timestamps
-				$time_delta = (int) ( $debt_info['current_date'] - $debt_info['previous_date'] );
+				$time_delta = ( $debt_info['current_date'] - $debt_info['previous_date'] );
 				$debt_delta = ( ( $debt_info['current_debt'] - $debt_info['previous_debt'] ) / $time_delta );
 
 				wp_enqueue_script( 'jquery' );
 
 			}
 		} else {
-			$debt_amount = 'INVALID';
+			$debt_amount           = 'INVALID';
 			$debt_amount_formatted = 'INVALID';
 		}
 
@@ -161,10 +161,10 @@ class Debtclock_Widget extends WP_Widget {
 	 * @return array Updated safe values to be saved.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance = array();
-		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-		$instance['introduction'] = ( ! empty( $new_instance['introduction'] ) ) ? strip_tags( $new_instance['introduction'] ) : '';
-		$instance['animate_p'] = ! empty( $new_instance['animate_p'] ) ? 1 : 0;
+		$instance                  = array();
+		$instance['title']         = ! empty( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';
+		$instance['introduction']  = ! empty( $new_instance['introduction'] ) ? wp_strip_all_tags( $new_instance['introduction'] ) : '';
+		$instance['animate_p']     = ! empty( $new_instance['animate_p'] ) ? 1 : 0;
 		$instance['show_credit_p'] = ! empty( $new_instance['show_credit_p'] ) ? 1 : 0;
 
 		return $instance;
@@ -222,7 +222,7 @@ class Debtclock_Widget extends WP_Widget {
 			<label for="<?php echo esc_attr( $this->get_field_id( 'show_credit_p' ) ); ?>"><?php esc_html_e( 'Include credit link to data source?' ); ?></label>
 		</p>
 
-	<?php
+		<?php
 
 		return true;
 	}
@@ -285,7 +285,7 @@ class JCH_Debtclock {
 		}
 		delete_transient( 'us_debtclock_widget_info' );
 
-		$debt_feed_url = 'https://treasurydirect.gov/NP/debt/rss';
+		$debt_feed_url                   = 'https://treasurydirect.gov/NP/debt/rss';
 		$us_debtclock_widget_info['url'] = 'https://treasurydirect.gov/NP/debt/current';
 
 		$debt_feed_contents = fetch_feed( $debt_feed_url );
@@ -295,7 +295,7 @@ class JCH_Debtclock {
 		}
 
 		// Get the most recent number and the one right before, for possible animation
-		$max_items = $debt_feed_contents->get_item_quantity( 2 );
+		$max_items                           = $debt_feed_contents->get_item_quantity( 2 );
 		list( $recent_debt, $previous_debt ) = $debt_feed_contents->get_items( 0, $max_items );
 
 		if ( ! ( is_object( $recent_debt ) && is_object( $previous_debt ) ) ) {
@@ -303,11 +303,11 @@ class JCH_Debtclock {
 		}
 
 		// Format timestamps as seconds since epoch for easier delta calculation in animation
-		$us_debtclock_widget_info['current_date'] = $recent_debt->get_date( 'U' );
+		$us_debtclock_widget_info['current_date']  = $recent_debt->get_date( 'U' );
 		$us_debtclock_widget_info['previous_date'] = $previous_debt->get_date( 'U' );
 
 		// <em>Debt Held by the Public:</em> 14,822,172,493,990.24<br /><em>Intragovernmental Holdings:</em> 5,652,677,544,564.30<br /><em>Total Public Debt Outstanding:</em> 20,474,850,038,554.541
-		$us_debtclock_widget_info['current_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $recent_debt->get_content() ) );
+		$us_debtclock_widget_info['current_debt']  = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $recent_debt->get_content() ) );
 		$us_debtclock_widget_info['previous_debt'] = (int) str_replace( ',', '', preg_replace( '/^.*Total Public Debt Outstanding:<\/em> (\S+)$/', '\1', $previous_debt->get_content() ) );
 
 		// If it doesn't have the field data requested, something went wrong
@@ -329,10 +329,12 @@ class JCH_Debtclock {
 
 $jch_debtclock_widget = new JCH_Debtclock();
 
-add_action( 'widgets_init', function() {
-	register_widget( 'Debtclock_Widget' );
-} );
-
+add_action(
+	'widgets_init',
+	function() {
+		register_widget( 'Debtclock_Widget' );
+	}
+);
 
 
 ?>

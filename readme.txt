@@ -2,7 +2,7 @@
 Contributors: chrishardie
 Tags: economy,finance,widgets,money,government,debt
 Requires at least: 2.8
-Tested up to: 5.3
+Tested up to: 5.4
 Version: 1.5
 Stable tag: trunk
 License: GPL2

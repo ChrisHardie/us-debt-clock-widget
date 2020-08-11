@@ -4,7 +4,7 @@ Plugin Name: U.S. Debt Clock Widget
 Plugin URI: https://github.com/ChrisHardie/us-debt-clock-widget
 Description: Display the U.S. national debt in a widget
 Author: Chris Hardie
-Version: 1.5
+Version: 1.6
 Author URI: https://chrishardie.com/
 License: GPL2
 */
@@ -285,8 +285,8 @@ class JCH_Debtclock {
 		}
 		delete_transient( 'us_debtclock_widget_info' );
 
-		$debt_feed_url                   = 'https://treasurydirect.gov/NP/debt/rss';
-		$us_debtclock_widget_info['url'] = 'https://treasurydirect.gov/NP/debt/current';
+		$debt_feed_url                   = 'https://treasurydirect.gov/NP_WS/debt/feeds/recent';
+		$us_debtclock_widget_info['url'] = 'https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/';
 
 		$debt_feed_contents = fetch_feed( $debt_feed_url );
 

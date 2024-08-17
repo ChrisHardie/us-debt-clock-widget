@@ -2,7 +2,7 @@
 
 > Creates a widget displaying the most recently available amount of the U.S. National Debt.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/tag/ChrisHardie/us-debt-clock-widget.svg?label=release)](https://github.com/ChrisHardie/us-debt-clock-widget/releases/latest) ![WordPress tested up to version](https://img.shields.io/wordpress/plugin/tested/us-debt-clock-widget) [![GPLv2 License](https://img.shields.io/github/license/ChrisHardie/us-debt-clock-widget.svg)](https://github.com/ChrisHardie/us-debt-clock-widget/blob/master/LICENSE) [![Follow @ChrisHardie](https://img.shields.io/twitter/follow/ChrisHardie?style=social)](https://twitter.com/ChrisHardie)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/tag/ChrisHardie/us-debt-clock-widget.svg?label=release)](https://github.com/ChrisHardie/us-debt-clock-widget/releases/latest) ![WordPress tested up to version](https://img.shields.io/wordpress/plugin/tested/us-debt-clock-widget) [![GPLv2 License](https://img.shields.io/github/license/ChrisHardie/us-debt-clock-widget.svg)](https://github.com/ChrisHardie/us-debt-clock-widget/blob/master/LICENSE) [![Follow @ChrisHardie](https://img.shields.io/mastodon/follow/000337759)](https://mastodon.social/@ChrisHardie)
 
 ## Description
 
